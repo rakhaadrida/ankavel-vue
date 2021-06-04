@@ -1,6 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import Packages from '../views/Package.vue'
+import Checkout from '../views/Checkout.vue'
+import Success from '../views/Success.vue'
 
 Vue.use(VueRouter)
 
@@ -11,10 +14,20 @@ const routes = [
     component: Home
   },
   {
-    path: '/about',
-    name: 'About',
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+    path: '/packages',
+    name: 'Packages',
+    component: Packages
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: Checkout
+  },
+  {
+    path: '/success',
+    name: 'Success',
+    component: Success
+  },
 ]
 
 const router = new VueRouter({
