@@ -16,76 +16,41 @@
         <div class="row">
           <div class="col-lg-8 pl-lg-0">
             <div class="card card-details">
-              <h1>Labuan Bajo</h1>
-              <p>NTB, Indonesia</p>
+              <h1>{{ packageDetails.title }}</h1>
+              <p>{{ packageDetails.location }}</p>
               <div class="gallery">
                 <div class="xzoom-container">
                   <img 
-                    src="images/bajo_details/bajo-1.png" 
+                    :src="picDefault" 
                     alt="Details Bajo" 
                     class="xzoom"
                     id="xzoom-default"
                     xoriginal=""
                   />
-                  <div class="xzoom-thumbs">
-                    <a href="">
-                      <img 
-                        src="images/bajo_details/bajo-2.png" 
-                        alt="Details Bajo"
-                        class="xzoom-gallery"
-                        width="128"
-                        xpreview=""
-                      />
-                    </a>
-                    <a href="">
-                      <img 
-                        src="images/bajo_details/bajo-3.png" 
-                        alt="Details Bajo"
-                        class="xzoom-gallery"
-                        width="128"
-                        xpreview=""
-                      />
-                    </a>
-                    <a href="">
-                      <img 
-                        src="images/bajo_details/bajo-4.png" 
-                        alt="Details Bajo"
-                        class="xzoom-gallery"
-                        width="128"
-                        xpreview=""
-                      />
-                    </a>
-                    <a href="">
-                      <img 
-                        src="images/bajo_details/bajo-5.png" 
-                        alt="Details Bajo"
-                        class="xzoom-gallery"
-                        width="128"
-                        xpreview=""
-                      />
-                    </a>
-                    <a href="">
-                      <img 
-                        src="images/bajo_details/bajo-6.png" 
-                        alt="Details Bajo"
-                        class="xzoom-gallery"
-                        width="128"
-                        xpreview=""
-                      />
-                    </a>
+                  <div class="xzoom-thumbs" v-if="packageDetails.gallery.length > 0">
+                    <img 
+                      v-for="ss in packageDetails.gallery.slice(1)" 
+                      :key="ss.id" 
+                      @click="changePic(ss.image)"
+                      :src="ss.image" 
+                      alt="Details Bajo"
+                      class="xzoom-gallery"
+                      width="131"
+                      xpreview=""
+                    />
                   </div>
                 </div>
               </div>
               <h2>About this Place</h2>
               <p>
-                Lokasi Wisata Terbaik
+                {{ packageDetails.about }}
               </p>
               <div class="features row"> 
                 <div class="col-md-4">
                     <img src="images/icons/ic_event.png" alt="" class="features-image">
                     <div class="description">
                       <h3>Featured Events</h3>
-                      <p>Tari Kecak</p>
+                      <p>{{ packageDetails.event }}</p>
                     </div>
                 </div>
                 <div class="col-md-4 border-left">
@@ -93,7 +58,7 @@
                     <img src="images/icons/ic_language.png" alt="" class="features-image">
                     <div class="description">
                       <h3>Language</h3>
-                      <p>Indonesia</p>
+                      <p>{{ packageDetails.language }}</p>
                     </div>
                   </div>
                 </div>
@@ -102,7 +67,7 @@
                     <img src="images/icons/ic_foods.png" alt="" class="features-image">
                     <div class="description">
                       <h3>Foods</h3>
-                      <p>Local</p>
+                      <p>{{ packageDetails.food }}</p>
                     </div>
                   </div>
                 </div>
@@ -126,32 +91,27 @@
                 <tr>
                   <th width="50%">Date of Departure</th>
                   <td width=:50% class="text-right">
-                    10 Jun 2021
+                    {{ packageDetails.departure_date }}
                   </td>
                 </tr>
                 <tr>
                   <th width="50%">Duration</th>
-                  <td width=:50% class="text-right">3 Days</td>
+                  <td width=:50% class="text-right">{{ packageDetails.duration }} Days</td>
                 </tr>
                 <tr>
                   <th width="50%">Type</th>
-                  <td width=:50% class="text-right">Business</td>
+                  <td width=:50% class="text-right">{{ packageDetails.type }}</td>
                 </tr>
                 <tr>
                   <th width="50%">Price</th>
-                  <td width=:50% class="text-right">$300 / Person</td>
+                  <td width=:50% class="text-right">${{ packageDetails.price }} / Person</td>
                 </tr>
               </table>
             </div>
             <div class="join-container">
-              <form action="" method="post">
-                <router-link to="/checkout" class="btn btn-block btn-join-now mt-5 py-2" type="submit">
-                  JOIN NOW
-                </router-link>
-              </form>
-              <!-- <a href="" class="btn btn-block btn-join-now mt-5 py-2">
+              <router-link v-bind:to="'/checkout/'+packageDetails.id" class="btn btn-block btn-join-now mt-5 py-2">
                 JOIN NOW
-              </a> -->
+              </router-link>
             </div>
           </div>
         </div>
@@ -159,3 +119,37 @@
     </section>
   </main>
 </template>
+
+<script>
+import axios from "axios";
+
+export default {    
+  name: "Details",
+  data() {
+    return {
+      picDefault: "",
+      packageDetails: []
+    };
+  },
+  methods: {
+    changePic(srcPic) {
+      this.picDefault = srcPic;
+    },
+    setDataPicture(data) {
+      this.packageDetails = data;
+      this.picDefault = data.gallery[1].image;
+    }
+  },
+  mounted() {
+    axios
+      .get("http://ankavel.test/public/api/packages", {
+        params: {
+          id: this.$route.params.id
+        }
+      })
+      .then((res) => (this.setDataPicture(res.data.data)))
+      
+      .catch((err) => console.log(err));
+  }
+};
+</script>

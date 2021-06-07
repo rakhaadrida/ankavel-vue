@@ -18,7 +18,7 @@
           <div class="col-lg-8 pl-lg-0">
             <div class="card card-details">
               <h1>Who is Going?</h1>
-              <p>Trip to Labuan Bajo, Indonesia</p>
+              <p>Trip to {{ packageDetails.title }}, {{ packageDetails.location }}</p>
               <div class="attendee">
                 <table class="table table-responsive-sm text-center">
                   <thead>
@@ -68,7 +68,7 @@
                   />
 
                   <label for="is_visa" class="sr-only">VISA</label>
-                  <select name="is_visa" required class="custom-select mb-2 mr-sm-2">
+                  <select name="is_visa" id="is_visa" required class="custom-select mb-2 mr-sm-2">
                     <option value="VISA" selected>VISA</option>
                     <option value="0">N/A</option>
                     <option value="1">30 Days</option>
@@ -94,9 +94,9 @@
                     >
                   </div>
 
-                  <button type="submit" class="btn btn-add-now mb-2 px-4">
+                  <a @click="addMember()" href="#" class="btn btn-add-now mb-2 px-4">
                     Add Now
-                  </button>
+                  </a>
                 </form>
                 <h3 class="mt-2 mb-0">Note</h3>
                 <p class="disclaimer mb-0">
@@ -119,7 +119,7 @@
                 </tr>
                 <tr>
                   <th width="50%">Trip Price</th>
-                  <td width=:50% class="text-right">$300 / Person</td>
+                  <td width=:50% class="text-right">${{ packageDetails.price }} / Person</td>
                 </tr>
                 <tr>
                   <th width="50%">Total Price</th>
@@ -180,3 +180,52 @@
     </section>
   </main>
 </template>
+
+<script>
+import axios from "axios";
+// const user = document.getElementById("username");
+// const nation = document.getElementById("nationality");
+// const visa = document.getElementById("is_visa");
+// const passport = document.getElementById("doe_passport");
+
+export default {
+  name: "Checkout",
+  data() {
+    return {
+      packageDetails: [],
+      listMember: []
+    };
+  },
+  methods: {
+    addMember() {
+      var memberStored = {
+        "username": "rakha",
+        "nationality": "adrida",
+        "is_visa": "30",
+        "doe_passport": "2021"
+      }
+
+      this.listMember.push(memberStored);
+      const parsed = JSON.stringify(this.listMember);
+      localStorage.setItem('listMember', parsed);
+    }
+  },
+  mounted() {
+    if (localStorage.getItem('listMember')) {
+      try {
+        this.listMember = JSON.parse(localStorage.getItem('listMember'));
+      } catch(e) {
+        // localStorage.removeItem('listMember');
+      }
+    }
+    axios
+      .get("http://ankavel.test/public/api/packages", {
+        params: {
+          id: this.$route.params.id
+        }
+      })
+      .then((res) => (this.packageDetails = res.data.data))
+      .catch((err) => console.log(err));
+  }
+}
+</script>

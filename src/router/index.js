@@ -14,12 +14,14 @@ const routes = [
     component: Home
   },
   {
-    path: '/packages',
+    path: '/packages/:id',
+    props: true,
     name: 'Packages',
     component: Packages
   },
   {
-    path: '/checkout',
+    path: '/checkout/:id',
+    props: true,
     name: 'Checkout',
     component: Checkout
   },
