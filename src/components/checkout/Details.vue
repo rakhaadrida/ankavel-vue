@@ -32,21 +32,17 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    <tr v-for="member in listMember" :key="member.username">
                       <td>
-                        <img src="https://ui-avatars.com/api/?name=rakha" 
+                        <img :src="'https://ui-avatars.com/api/?name='+member.username" 
                           height="60px" class="rounded-circle" />
                       </td>
-                      <td class="align-middle">Rakha</td>
-                      <td class="align-middle">Indonesia</td>
-                      <td class="align-middle">30 Days</td>
+                      <td class="align-middle">{{ member.username }}</td>
+                      <td class="align-middle">{{ member.nationality }}</td>
+                      <td class="align-middle">{{ member.is_visa == 0 ? 'N/A' : '30 Days' }}</td>
+                      <td class="align-middle">{{ member.doe_passport }}</td>
                       <td class="align-middle">
-                        Active
-                      </td>
-                      <td class="align-middle">
-                        <a href="">
-                          <img src="images/icons/ic_remove.png" height="20px">
-                        </a>
+                        <img @click="removeItem(member.username)" src="images/icons/ic_remove.png" height="20px" />
                       </td>
                     </tr>
                     <!-- <tr>
@@ -63,12 +59,12 @@
                     type="text" style="width: 160px"
                     class="form-control mb-2 mr-sm-2" 
                     id="username"
-                    name="username"
+                    v-model="dataMember.username"
                     placeholder="Username" 
                   />
 
                   <label for="is_visa" class="sr-only">VISA</label>
-                  <select name="is_visa" id="is_visa" required class="custom-select mb-2 mr-sm-2">
+                  <select id="is_visa" required class="custom-select mb-2 mr-sm-2" v-model="dataMember.is_visa">
                     <option value="VISA" selected>VISA</option>
                     <option value="0">N/A</option>
                     <option value="1">30 Days</option>
@@ -79,7 +75,7 @@
                     type="text" style="width: 55px"
                     class="form-control mb-2 mr-sm-2" 
                     id="nationality"
-                    name="nationality"
+                    v-model="dataMember.nationality"
                     placeholder="Nat" 
                   />
 
@@ -89,7 +85,7 @@
                       type="text" 
                       class="form-control datepicker" 
                       id="doe_passport"
-                      name="doe_passport" 
+                      v-model="dataMember.doe_passport" 
                       placeholder="DOE Passport"
                     >
                   </div>
@@ -111,11 +107,11 @@
               <table class="trip-information">
                 <tr>
                   <th width="50%">Members</th>
-                  <td width=:50% class="text-right">1 Persons</td>
+                  <td width=:50% class="text-right">{{ listMember.length }} Persons</td>
                 </tr>
                 <tr>
                   <th width="50%">Additional VISA</th>
-                  <td width=:50% class="text-right">$0.00</td>
+                  <td width=:50% class="text-right">${{ biayaVisa }}.00</td>
                 </tr>
                 <tr>
                   <th width="50%">Trip Price</th>
@@ -123,13 +119,12 @@
                 </tr>
                 <tr>
                   <th width="50%">Total Price</th>
-                  <td width=:50% class="text-right">$300.00</td>
+                  <td width=:50% class="text-right">${{ totalHarga }}.00</td>
                 </tr>
                 <tr>
-                  <th width="50%">Total Pay</th>
+                  <th width="50%">Total Price + VISA</th>
                   <td width=:50% class="text-right text-total">
-                    <span class="text-blue">$300</span>
-                    <span class="text-orange">.01</span>
+                    <span class="text-blue">${{ totalBiaya }}.00</span>
                   </td>
                 </tr>
               </table>
@@ -165,9 +160,9 @@
               </div>
             </div>
             <div class="join-container">
-              <router-link to="/success" class="btn btn-block btn-join-now mt-5 py-2">
-                I HAVE MADE PAYMENT
-              </router-link>
+              <!-- <router-link to="/success"> -->
+                <a @click="checkout()" href="#" class="btn btn-block btn-join-now mt-5 py-2">I HAVE MADE PAYMENT</a>
+              <!-- </router-link> -->
             </div>
             <div class="text-center mt-3">
               <a href="" class="text-muted">
@@ -183,31 +178,81 @@
 
 <script>
 import axios from "axios";
-// const user = document.getElementById("username");
-// const nation = document.getElementById("nationality");
-// const visa = document.getElementById("is_visa");
-// const passport = document.getElementById("doe_passport");
+// import $ from "jquery";
+
+var today = new Date();
+var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 
 export default {
   name: "Checkout",
   data() {
     return {
       packageDetails: [],
-      listMember: []
+      listMember: [],
+      dataMember: {
+        username: "",
+        nationality: "",
+        is_visa: "",
+        doe_passport: "" 
+      },
+      tanggal: date
     };
   },
   methods: {
     addMember() {
       var memberStored = {
-        "username": "rakha",
-        "nationality": "adrida",
-        "is_visa": "30",
-        "doe_passport": "2021"
+        "username": this.dataMember.username,
+        "nationality": this.dataMember.nationality,
+        "is_visa": this.dataMember.is_visa,
+        "doe_passport": this.dataMember.doe_passport
       }
 
-      this.listMember.push(memberStored);
+      if(this.dataMember.username != '') {
+        this.listMember.push(memberStored);
+        const parsed = JSON.stringify(this.listMember);
+        localStorage.setItem('listMember', parsed);
+      }
+    },
+    removeItem(idx) {
+      let listMemberStorage = JSON.parse(localStorage.getItem("listMember"));
+      let itemlistMemberStorage = listMemberStorage.map(itemlistMemberStorage => itemlistMemberStorage.username);
+      let index = itemlistMemberStorage.findIndex(id => id == idx)
+      this.listMember.splice(index, 1);
+
       const parsed = JSON.stringify(this.listMember);
-      localStorage.setItem('listMember', parsed);
+      localStorage.setItem("listMember", parsed);
+    },
+    checkout() {
+      let usernames = this.listMember.map(function(memberx) {
+        return memberx.username
+      });
+      let nationalitys = this.listMember.map(function(memberx) {
+        return memberx.nationality
+      });
+      let is_visas = this.listMember.map(function(memberx) {
+        return memberx.is_visa
+      });
+      let doe_passports = this.listMember.map(function(memberx) {
+        return memberx.doe_passport
+      });
+
+      let checkoutData = {
+        "travel_packages_id": this.packageDetails.id,
+        "users_id": "1",
+        "additional_visa": this.biayaVisa,
+        "total": this.totalHarga,
+        "status": "PENDING",
+        "username": usernames,
+        "nationality": nationalitys,
+        "is_visa": is_visas,
+        "doe_passport": doe_passports,
+      };
+
+      axios
+      .post("http://ankavel.test/public/api/checkout", checkoutData)
+      .then(() => this.$router.push("../success"))
+
+      .catch(err => console.log(err));
     }
   },
   mounted() {
@@ -215,7 +260,7 @@ export default {
       try {
         this.listMember = JSON.parse(localStorage.getItem('listMember'));
       } catch(e) {
-        // localStorage.removeItem('listMember');
+        localStorage.removeItem('listMember');
       }
     }
     axios
@@ -226,6 +271,29 @@ export default {
       })
       .then((res) => (this.packageDetails = res.data.data))
       .catch((err) => console.log(err));
+
+    // $(document).ready(function() {
+    //   $('.datepicker').datepicker({
+    //     format: 'yyyy-mm-dd',
+    //     uiLibrary: 'bootstrap4',
+    //     icons: {
+    //       rightIcon: '<img src="images/icons/ic_calendar.png" />'
+    //     }
+    //   });
+    // });
+  },
+  computed: {
+    totalHarga() {
+      return this.listMember.length * this.packageDetails.price;
+    },
+    biayaVisa() {
+      return this.listMember.reduce(function(items, data) {
+        return items + (100 - (data.is_visa * 100));
+      }, 0);
+    },
+    totalBiaya() {
+      return (this.listMember.length * this.packageDetails.price) + this.biayaVisa;
+    }
   }
 }
 </script>
